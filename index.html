@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>المساعد السيبراني</title>
+<style>
+:root{--bg:#030806;--panel:rgba(5,14,10,.82);--green:#00ff6a;--red:#ff2a3d;--text:#cfeedd;--muted:#6f9482;--border:rgba(0,255,106,.35);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#030806}}
+:root[data-theme="dark"]{--bg:#030806}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Arabic",Tahoma,Arial,sans-serif;overflow:hidden}
+#rain{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+body:after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at center,transparent 30%,rgba(0,0,0,.85) 100%),repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+.screen{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
+#chatScr{display:none;justify-content:flex-start;padding:0}
+.card{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:26px 22px;text-align:center;box-shadow:0 0 30px rgba(0,255,106,.18),inset 0 0 25px rgba(255,42,61,.06);backdrop-filter:blur(4px)}
+.logo{font-size:2rem;letter-spacing:0;margin:0;color:var(--green);text-shadow:0 0 14px rgba(0,255,106,.6);font-weight:700;animation:glitch 3.5s infinite}
+@keyframes glitch{0%,92%,100%{transform:none}93%{transform:translate(2px,-1px)}95%{transform:translate(-3px,1px)}97%{transform:translate(2px,2px)}}
+.tag{color:var(--red);font-size:.78rem;margin:6px 0 20px;letter-spacing:0}
+label{display:block;margin-bottom:10px;line-height:1.7}
+select,textarea{width:100%;background:#020a06;color:var(--green);border:1px solid var(--border);border-radius:10px;padding:12px;font:inherit;font-size:1rem;outline:none}
+select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 10px rgba(0,255,106,.4)}
+.btn{margin-top:16px;width:100%;background:transparent;color:var(--green);border:1px solid var(--green);border-radius:10px;padding:12px;font:inherit;font-weight:700;font-size:1rem;cursor:pointer;transition:.2s}
+.btn:hover:not(:disabled){background:var(--green);color:#001a0c;box-shadow:0 0 18px var(--green)}
+.btn:disabled{opacity:.4}
+header{width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
+.av{width:38px;height:38px;border-radius:50%;border:1px solid var(--green);display:grid;place-items:center;color:var(--green);font-weight:700;box-shadow:0 0 10px rgba(0,255,106,.5)}
+header b{display:block}header small{color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);display:inline-block;margin-inline-end:5px;animation:bl 1.4s infinite}
+@keyframes bl{50%{opacity:.25}}
+#back{margin-inline-start:auto;background:none;border:1px solid var(--red);color:var(--red);border-radius:8px;padding:5px 10px;font:inherit;font-size:.8rem;cursor:pointer}
+#chat{flex:1;width:100%;max-width:760px;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:10px 14px;border-radius:12px;overflow-wrap:anywhere;font-size:.95rem;line-height:1.7}
+.bot{align-self:flex-start;background:rgba(0,40,20,.75);border:1px solid var(--border)}
+.me{align-self:flex-end;background:rgba(60,0,8,.75);border:1px solid rgba(255,42,61,.5)}
+.msg pre,.msg code{font-family:"Courier New",ui-monospace,monospace}
+.msg pre{direction:ltr;text-align:left;background:#000;color:var(--green);padding:10px;border-radius:8px;overflow-x:auto;font-size:.82rem;margin:8px 0;border:1px solid var(--border)}
+.msg code{direction:ltr;unicode-bidi:embed;background:rgba(0,255,106,.12);padding:1px 5px;border-radius:4px}
+.msg pre code{background:none;padding:0}
+#bar{width:100%;max-width:760px;display:flex;gap:8px;padding:10px 14px 14px}
+#bar textarea{resize:none;max-height:120px}
+#send{background:var(--green);color:#001a0c;border:0;border-radius:10px;padding:0 18px;font:inherit;font-weight:700;cursor:pointer}
+#send:disabled{opacity:.4}
+</style>
+</head>
+<body>
+<canvas id="rain"></canvas>
+
+<div class="screen" id="pick">
+  <div class="card">
+    <h1 class="logo">المساعد السيبراني<br><span style="font-size:1.1rem;letter-spacing:.12em">CYBER ASSISTANT</span></h1>
+    <p class="tag">&gt; أمّن · تعلّم · دافع &nbsp;|&nbsp; Secure · Learn · Defend_</p>
+    <label for="who">منو تحب يجاوبك؟<br><span style="color:var(--muted);font-size:.9rem">Who would you like to answer you?</span></label>
+    <select id="who">
+      <option value="" disabled selected>— اختر | Choose —</option>
+      <option value="أيمن|Ayman">أيمن | Ayman</option>
+      <option value="بهاء|Bahaa">بهاء | Bahaa</option>
+      <option value="إيناس|Enas">إيناس | Enas</option>
+      <option value="فاطمة|Fatima">فاطمة | Fatima</option>
+      <option value="شمس|Shams">شمس | Shams</option>
+    </select>
+    <button class="btn" id="enter" type="button">دخول | Enter</button>
+  </div>
+</div>
+
+<div class="screen" id="chatScr">
+  <header>
+    <div class="av" id="av">?</div>
+    <div><b id="nm"></b><small><span class="dot"></span>online</small></div>
+    <button id="back">↩</button>
+  </header>
+  <div id="chat"></div>
+  <div id="bar">
+    <textarea id="q" rows="1" dir="auto" placeholder="اكتب سؤالك..."></textarea>
+    <button id="send">&gt;</button>
+  </div>
+</div>
+
+<script>
+// ---------- Matrix rain ----------
+const cv=document.getElementById('rain'),cx=cv.getContext('2d');
+const CH='01ABCDEF0123456789<>{}[]/\\#$%&*+=ｱｲｳｴｵｶｷｸｹｺ'.split('');
+let cols,drops,fs=16;
+function sizeRain(){cv.width=innerWidth;cv.height=innerHeight;cols=Math.ceil(cv.width/fs);drops=Array.from({length:cols},()=>Math.random()*-50)}
+sizeRain();addEventListener('resize',sizeRain);
+function rain(){
+  cx.fillStyle='rgba(3,8,6,.09)';cx.fillRect(0,0,cv.width,cv.height);
+  cx.font=fs+'px monospace';
+  for(let i=0;i<cols;i++){
+    const red=(i*7919)%11===0;
+    cx.fillStyle=red?'#ff2a3d':'#00ff6a';
+    cx.globalAlpha=red?.85:.7;
+    cx.fillText(CH[Math.random()*CH.length|0],i*fs,drops[i]*fs);
+    if(drops[i]*fs>cv.height&&Math.random()>.975)drops[i]=0;
+    drops[i]+=.6;
+  }
+  cx.globalAlpha=1;
+}
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches)setInterval(rain,55);
+
+// ---------- Persona + chat ----------
+const $=id=>document.getElementById(id);
+const who=$('who'),enter=$('enter'),chatEl=$('chat'),q=$('q'),sendBtn=$('send');
+let persona=null,busy=false;
+
+who.addEventListener('change',()=>{who.style.borderColor=''});
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function render(t){return t.split('```').map((p,i)=>i%2?'<pre><code>'+esc(p.replace(/^[a-zA-Z0-9+#-]*\n/,''))+'</code></pre>':esc(p).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>')).join('')}
+function add(role,text){const d=document.createElement('div');d.className='msg '+(role==='user'?'me':'bot');d.dir='auto';role==='user'?d.textContent=text:d.innerHTML=render(text);chatEl.appendChild(d);chatEl.scrollTop=chatEl.scrollHeight;return d}
+
+enter.onclick=()=>{
+  if(!who.value){who.style.borderColor='#ff2a3d';who.focus();return}
+  const [ar,en]=who.value.split('|');persona={ar,en};
+  $('pick').style.display='none';$('chatScr').style.display='flex';
+  $('av').textContent=ar[0];$('nm').textContent=ar;
+  chatEl.innerHTML='';
+  add('bot',`أنا ${ar}، أهلاً بيك بموقعنا. بشنو تحب أساعدك؟`);
+  q.focus();
+};
+$('back').onclick=()=>{$('chatScr').style.display='none';$('pick').style.display='flex'};
+
+// =====================================================
+//  قسم الأسئلة والأجوبة — أضف أسئلتك الجديدة هنا
+//  كل سؤال بهالشكل (لا تنسى الفاصلة بالنهاية):
+//  {lang:"ar", q:["صيغة السؤال 1","صيغة السؤال 2"], a:"الجواب"},
+//  lang: "ar" للعربي أو "en" للإنكليزي
+//  q: كل الطرق اللي ممكن المستخدم يسأل بيها نفس السؤال
+//  ممنوع تستخدم علامة " داخل النص، استخدم ' بدالها
+// =====================================================
+const FAQ=[
+{lang:"ar",q:["هلو","مرحبا","اهلا","سلام","هلا"],a:"هلا بيك! اسألني عن الأمن السيبراني أو البرمجة أو الذكاء الاصطناعي، وأنا حاضر."},
+{lang:"ar",q:["شنو هو الفاير وول وكيف يشتغل","الفايروول","الفاير وول","جدار الحماية","firewall"],a:"الـ Firewall (جدار الحماية) مثل حارس على باب الشبكة: يراقب كل البيانات الداخلة والخارجة ويسمح أو يمنع حسب قواعد معينة. مثلاً يمنع محاولات دخول مشبوهة من الإنترنت لجهازك أو شبكتك. وفيه نوعين: برمجي على الجهاز، وجهاز مخصص للشبكة."},
+{lang:"ar",q:["شنو هو الفيشنك","فيشنك","الفيشنج","فيشنج","التصيد الاحتيالي","phishing","شلون احمي نفسي من الفيشنك"],a:"الـ Phishing (التصيد) هو رسالة أو رابط مزيف يتنكر بشكل بنك أو شركة حتى يسرق بياناتك مثل كلمة المرور. للحماية: لا تضغط على روابط مجهولة، تأكد من عنوان المرسل، لا تعطي كلمة مرورك لأي أحد، وفعّل التحقق بخطوتين."},
+{lang:"ar",q:["شنو الفرق بين virus و malware","الفرق بين الفايروس والبرمجيات الخبيثة","malware","فايروس","البرمجيات الخبيثة"],a:"الـ Malware هو الاسم العام لأي برنامج خبيث، والـ Virus نوع واحد منه، يلصق نفسه ببرنامج ثاني وينتشر. من أنواع الـ Malware الثانية: Worm وTrojan وRansomware وSpyware."},
+{lang:"ar",q:["شلون اسوي كلمة مرور قوية","كلمة مرور قوية","باسورد قوي","كلمة السر القوية"],a:"كلمة المرور القوية تكون طويلة (١٢ حرف أو أكثر) وتخلط حروف كبيرة وصغيرة وأرقام ورموز، وما تكون معلومة شخصية مثل اسمك أو تاريخ ميلادك. وأفضل شي تستخدم كلمة مختلفة لكل حساب مع برنامج Password Manager."},
+{lang:"ar",q:["شنو هو التحقق بخطوتين","التحقق الثنائي","2FA","المصادقة الثنائية"],a:"التحقق بخطوتين (2FA) يعني بعد كلمة المرور تحتاج خطوة ثانية، مثل رمز يوصلك على التطبيق أو الرسالة. حتى لو أحد سرق كلمة مرورك ما يكدر يدخل حسابك بدون هذا الرمز."},
+{lang:"ar",q:["شنو هو الذكاء الاصطناعي","الذكاء الاصطناعي","الذكاء الصناعي"],a:"الذكاء الاصطناعي هو جعل الحاسوب يتصرف بشكل ذكي: يتعلم من البيانات ويفهم الكلام ويتخذ قرارات. أمثلته: المساعدات الصوتية، توصيات يوتيوب، وبرامج الترجمة. ومن أهم فروعه Machine Learning (تعلّم الآلة)."},
+{lang:"ar",q:["من وين ابدأ بالامن السيبراني","شلون ابدأ بالامن السيبراني","ابدأ بالامن السيبراني","تعلم الامن السيبراني"],a:"ابدأ بالأساسيات: الشبكات (IP وDNS وTCP/IP)، نظام Linux، وشوية Python. بعدها جرّب منصات تدريب قانونية مثل TryHackMe وHack The Box، وخلي هدفك شهادة مثل Security+ أو CCNA. والمهم تتعلم بشكل قانوني وأخلاقي."},
+{lang:"ar",q:["شنو هو VPN","vpn","الشبكة الافتراضية الخاصة"],a:"الـ VPN ينشئ نفق مشفر بين جهازك والإنترنت، فيخفي عنوانك الحقيقي ويحمي بياناتك خصوصاً على الواي فاي العام. بس ما يحميك من الفايروسات أو الروابط الاحتيالية."},
+{lang:"ar",q:["شنو هو DNS","dns","نظام اسماء النطاقات"],a:"الـ DNS مثل دليل الهاتف للإنترنت: يحوّل اسم الموقع مثل google.com إلى عنوان IP يفهمه الحاسوب. بدونه كان لازم تحفظ أرقام كل موقع."},
+{lang:"ar",q:["شنو هو SQL Injection","sql injection","حقن SQL","شلون احمي موقعي من sql injection"],a:"الـ SQL Injection ثغرة تصير لما الموقع يدخل نص المستخدم مباشرة داخل استعلام قاعدة البيانات، فيكدر المهاجم يغير الاستعلام. للحماية: استخدم Prepared Statements، وتحقق من المدخلات، وأعطِ قاعدة البيانات أقل صلاحيات ممكنة."},
+{lang:"en",q:["hello","hi","hey"],a:"Hey there! Ask me anything about cybersecurity, programming or AI and I'll do my best."},
+{lang:"en",q:["what is a firewall","how does a firewall work","firewall"],a:"A firewall is like a security guard for your network: it watches all incoming and outgoing traffic and allows or blocks it based on rules. It can be software on your device or a dedicated network appliance."},
+{lang:"en",q:["what is phishing","how to avoid phishing","phishing"],a:"Phishing is a fake message or link pretending to be a bank or company to steal your data, like passwords. To stay safe: don't click unknown links, check the sender's address, never share your password, and enable two-factor authentication."},
+{lang:"en",q:["difference between virus and malware","what is malware","malware","virus"],a:"Malware is the general term for any malicious software. A virus is just one type that attaches itself to other programs and spreads. Other types include worms, trojans, ransomware and spyware."},
+{lang:"en",q:["how to create a strong password","strong password","password"],a:"A strong password is long (12+ characters), mixes upper and lower case letters, numbers and symbols, and avoids personal info. Best practice: use a different password for every account with a password manager."},
+{lang:"en",q:["what is two factor authentication","2fa","two-factor authentication","mfa"],a:"Two-factor authentication (2FA) adds a second step after your password, like a code from an app or SMS. Even if someone steals your password, they can't log in without that code."},
+{lang:"en",q:["what is artificial intelligence","what is ai","ai","artificial intelligence"],a:"Artificial intelligence is making computers act intelligently: learning from data, understanding language and making decisions. Examples: voice assistants, recommendation systems and translation tools. Machine learning is one of its main branches."},
+{lang:"en",q:["how do i start cybersecurity","where to start in cybersecurity","learn cybersecurity"],a:"Start with the basics: networking (IP, DNS, TCP/IP), Linux, and a bit of Python. Then practice on legal platforms like TryHackMe or Hack The Box, and aim for a certification like Security+ or CCNA. Always learn ethically and legally."},
+{lang:"en",q:["what is a vpn","vpn"],a:"A VPN creates an encrypted tunnel between your device and the internet, hiding your real IP address and protecting your data, especially on public Wi-Fi. It does not protect you from viruses or phishing links."}
+];
+const FALL_AR="أنا جداً أعتذر منك، لكن لا أملك الصلاحيات والمعلومات الكافية للإجابة عن هذا الموضوع.";
+const FALL_EN="I'm very sorry, but I don't have the permissions or sufficient information to answer this topic.";
+const STOP=new Set("شنو هو هي هذا هاي هذه من وين في على عن الي اللي ما شلون كيف لي ممكن اشرح اريد بين يعني هل ماذا شو مع او لو what is a an the of to how do does i in and for on my me you can are where between about explain please tell give".split(" "));
+function norm(s){return s.toLowerCase().replace(/[\u064B-\u0652\u0640]/g,"").replace(/[إأآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/ؤ/g,"و").replace(/ئ/g,"ي")}
+function toks(s){return norm(s).split(/[^\p{L}\p{N}]+/u).filter(Boolean).map(w=>w.replace(/^ال/,"")).filter(w=>w.length>1&&!STOP.has(w))}
+function best(text){
+  const lang=/[\u0600-\u06FF]/.test(text)?"ar":"en";
+  const u=toks(text),un=norm(text).trim();
+  let top=null,ts=0;
+  for(const e of FAQ){if(e.lang!==lang)continue;
+    for(const qq of e.q){
+      const t=toks(qq);if(!t.length||!u.length)continue;
+      let c=0;for(const w of u)if(t.includes(w))c++;
+      let sc=c/Math.sqrt(u.length*t.length);
+      if(un===norm(qq).trim())sc=1;
+      if(sc>ts){ts=sc;top=e}
+    }}
+  return{lang,e:ts>=0.5?top:null};
+}
+function ask(){
+  const text=q.value.trim();if(!text||busy)return;
+  q.value='';q.style.height='auto';add('user',text);
+  const bot=add('bot','▍');busy=true;sendBtn.disabled=true;
+  setTimeout(()=>{
+    const r=best(text);
+    bot.innerHTML=render(r.e?r.e.a:(r.lang==="ar"?FALL_AR:FALL_EN));
+    chatEl.scrollTop=chatEl.scrollHeight;busy=false;sendBtn.disabled=false;q.focus();
+  },500);
+}
+sendBtn.onclick=ask;
+q.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask()}});
+q.addEventListener('input',()=>{q.style.height='auto';q.style.height=Math.min(q.scrollHeight,120)+'px'});
+</script>
+</body>
+</html>
